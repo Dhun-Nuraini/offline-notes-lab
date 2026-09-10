@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 
 type Note = { id: number; title: string; body: string; updated: string };
 
@@ -17,7 +17,8 @@ export default function Home() {
  const [online, setOnline] = useState(navigator.onLine);
  const [title, setTitle] = useState("");
  const [body, setBody] = useState("");
- const progress = useMemo(() => Math.round(done.length / steps.length * 100), [done]);
+ const [menuOpen, setMenuOpen] = useState(false);
+ const progress = Math.round(done.length / steps.length * 100);
  useEffect(() => { localStorage.setItem("notes", JSON.stringify(notes)); }, [notes]);
  useEffect(() => {
  const on = () => setOnline(true); const off = () => setOnline(false);
@@ -31,9 +32,20 @@ export default function Home() {
  }
  return (
  <div className="shell">
- <header><strong>Offline Notes Lab</strong><span>{online ? "Online" : "Offline"}</span></header>
- <aside><p>WORKSHOP MAP</p>{steps.map((step, index) => <button key={step} onClick={() => setDone(done.includes(index) ? done.filter((x) => x !== index) : [...done, index])}>{done.includes(index) ? "✓ " : `${index + 1}. `}{step}</button>)}<small>{progress}% complete</small></aside>
- <main><p className="eyebrow">FOUNDATION TRACK</p><h1>Keep learning when the network leaves.</h1><h3>Project By: Dhun-Nuraini Idris</h3>Matric No.: 2024/1/95110CP<h3></h3> <p className="lede">Save a note, refresh the page, then test the same experience with the network turned off.</p>
+ <header>
+ <div className="header-left">
+ <button type="button" className="hamburger" onClick={() => setMenuOpen((v) => !v)} aria-label="Toggle workshop map">☰</button>
+ <strong>Offline Notes Lab</strong>
+ </div>
+ <span>{online ? "Online" : "Offline"}</span>
+ </header>
+ {menuOpen && <div className="backdrop" onClick={() => setMenuOpen(false)} />}
+ <aside className={`workshop-map${menuOpen ? " open" : ""}`}>
+ <div className="workshop-map-head"><p>WORKSHOP MAP</p><button type="button" className="close-map" onClick={() => setMenuOpen(false)} aria-label="Close">×</button></div>
+ {steps.map((step, index) => <button key={step} onClick={() => setDone(done.includes(index) ? done.filter((x) => x !== index) : [...done, index])}>{done.includes(index) ? "✓ " : `${index + 1}. `}{step}</button>)}
+ <small>{progress}% complete</small>
+ </aside>
+ <main><p className="eyebrow">FOUNDATION TRACK</p><h1>Keep learning when the network leaves.</h1><h3>Project By: Dhun-Nuraini Idris</h3><h3>Matric No.: 2024/1/95110CP</h3><p className="lede">Save a note, refresh the page, then test the same experience with the network turned off.</p>
  <section className="columns"><div><h2>Notes from the lab</h2>{notes.map((note) => <article key={note.id}><h3>{note.title}</h3><p>{note.body}</p><small>{note.updated}</small></article>)}</div>
  <form onSubmit={(event) => { event.preventDefault(); addNote(); }}><h2>Write a note</h2><label>Title<input value={title} onChange={(event) => setTitle(event.target.value)} /></label><label>Observation<textarea value={body} onChange={(event) => setBody(event.target.value)} rows={5} /></label><button type="submit">Save locally</button></form>
  </section>
